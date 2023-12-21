@@ -12,4 +12,4 @@ card_t stock[52] = {
 };
 
 unsigned int opened_card_count = 2;
-card_t community_card[3] = {};
+card_t community_card[5] = {};

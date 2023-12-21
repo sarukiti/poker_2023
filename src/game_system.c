@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <time.h>
 
 #include "poker_type.h"
@@ -36,22 +37,100 @@ player_t player_init(){
     return player;
 }
 
-void hand_evaluation(player_t player){
-    if(opened_card_count == 5) {
-        //ロイヤルストレートフラッシュ
-        //ストレートフラッシュ
-        //フルハウス
-        //フラッシュ
-        //ストレート
+hand_t pair_hand_judge(...){
+    card_t cards[opened_card_count];
+    va_list ap;
+    va_start(ap);
+    for(int i = 0; i < opened_card_count; i++){
+        cards[i] = va_arg(ap, card_t);
     }
-    if(opened_card_count >= 4){
-        //フォーカード
-        //ツーペア
+    va_end(ap);
+    
+    int pair_count = 0;
+    for(int i = 0; i < opened_card_count; i++) {
+        for(int j = i + 1; j < opened_card_count; j++) {
+            if (cards[i].number == cards[j].number){
+                pair_count++;
+            }
+        }
     }
-    if(opened_card_count >= 3){
-        //スリーカード
+    switch(pair_count){
+        case 1:
+            return ONE_PAIR;
+        case 2:
+            return TWO_PAIR;
+        case 3:
+            return THREE_CARD;
+        case 4:
+            return FULLHOUSE;
+        case 6:
+            return FOUR_CARD;
+        default:
+            return NONE;
+    }
+}
+
+void community_card_open(){
+    community_card[opened_card_count-2] = draw_card();
+    opened_card_count++;
+}
+
+void hand_evaluation(player_t* player){
+    hand_t ref = NONE;
+    switch(opened_card_count){
+        case 7:
+            ref = pair_hand_judge((*player).hand_card[0], (*player).hand_card[1], community_card[0], community_card[1], community_card[2], community_card[3], community_card[4]);
+            break;
+        case 6:
+            ref = pair_hand_judge((*player).hand_card[0], (*player).hand_card[1], community_card[0], community_card[1], community_card[2], community_card[3]);
+            break;
+        case 5:
+            ref = pair_hand_judge((*player).hand_card[0], (*player).hand_card[1], community_card[0], community_card[1], community_card[2]);
+            break;
+        case 4:
+            ref = pair_hand_judge((*player).hand_card[0], (*player).hand_card[1], community_card[0], community_card[1]);
+            break;
+        case 3:
+            ref = pair_hand_judge((*player).hand_card[0], (*player).hand_card[1], community_card[0]);
+            break;
+        case 2:
+            ref = pair_hand_judge((*player).hand_card[0], (*player).hand_card[1]);
+            break;
+    }
+
+    //ロイヤルストレートフラッシュ
+    //ストレートフラッシュ
+    //フォーカード
+    if(ref == FOUR_CARD){
+        (*player).hand = FOUR_CARD;
+        return;
+    }
+    //フルハウス
+    if(ref == FULLHOUSE){
+        (*player).hand = FULLHOUSE;
+        return;
+    }
+    //フラッシュ
+    //ストレート
+    //スリーカード
+    if(ref == THREE_CARD){
+        (*player).hand = THREE_CARD;
+        return;
+    }
+    //ツーペア
+    if(ref == TWO_PAIR){
+        (*player).hand = TWO_PAIR;
+        return;
     }
     //ペア
+    if(ref == ONE_PAIR){
+        (*player).hand = ONE_PAIR;
+        return;
+    }
+    //ハイカード
+    (*player).hand = HIGH_CARD;
+    return;
+
 }
 
 int hand_card_max(card_t* card){
@@ -97,10 +176,12 @@ int main(void){
     srand((unsigned int)time(NULL));
     shuffle_stock(stock);
     player_t player1 = player_init();
-    player_t player2 = player_init();
-    player_t player3 = player_init();
-    player_t player4 = player_init();
-    player_rank_evaluation(&player1, &player2, &player3, &player4);
+    community_card_open();
+    community_card_open();
+    community_card_open();
+    community_card_open();
+    community_card_open();
+    hand_evaluation(&player1);
     return 0;
 }
 
