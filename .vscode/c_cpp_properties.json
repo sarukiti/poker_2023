@@ -6,9 +6,8 @@
                 "${workspaceFolder}/**",
                 "${workspaceFolder}"
             ],
-            "defines": [],
-            "compilerPath": "/usr/bin/gcc",
-            "cStandard": "c17",
+            "compilerPath": "/home/sarukiti/.local/bin/gcc-13.2.0/bin/gcc",
+            "cStandard": "c23",
             "intelliSenseMode": "linux-gcc-x64"
         }
     ],

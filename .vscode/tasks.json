@@ -3,9 +3,10 @@
         {
             "type": "cppbuild",
             "label": "C/C++: gcc アクティブなファイルのビルド",
-            "command": "/usr/bin/gcc",
+            "command": "/home/sarukiti/.local/bin/gcc-13.2.0/bin/gcc",
             "args": [
                 "-fdiagnostics-color=always",
+                "-std=c2x",
                 "-I",
                 "${workspaceFolder}/include",
                 "-lm",
