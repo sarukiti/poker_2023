@@ -175,44 +175,15 @@ void hand_evaluation(player_t* player){
     //ハイカード
     (*player).hand = HIGH_CARD;
     return;
-
-}
-
-int hand_card_max(card_t* card){
-    return max(card[0].number, card[1].number);
-}
-int hand_suit_max(card_t* card){
-    return max(card[0].suit, card[1].suit);
-}
-
-void swap(player_t *x, player_t *y){
-    player_t temp;
-    temp = *x;
-    *x = *y;
-    *y = temp;
 }
 
 void player_rank_evaluation(player_t* player1, player_t* player2, player_t* player3, player_t* player4){
     player_t* players[4] = {player1, player2, player3, player4};
-    for(int i = 0; i < 3; i++){
-        for(int j = 3; j >= i + 1; j--){
-            if((*players)[j].hand > (*players)[j-1].hand) {
-                swap(players[j], players[j-1]);
-            }else if((*players)[j].hand == (*players)[j-1].hand){
-                if(hand_card_max((*players)[j].hand_card) > hand_card_max((*players)[j-1].hand_card)){
-                    swap(players[j], players[j-1]);
-                }else if(hand_card_max((*players)[j].hand_card) == hand_card_max((*players)[j-1].hand_card)){
-                    if(hand_suit_max((*players)[j].hand_card) > hand_suit_max((*players)[j-1].hand_card)){
-                        swap(players[j], players[j-1]);
-                    }
-                }
-            }
-        }
-    }
-    (*players)[0].rank = 1;
-    (*players)[1].rank = 2;
-    (*players)[2].rank = 3;
-    (*players)[3].rank = 4;
+    qsort(players, 4, sizeof(player_t*), compare_player_rank);
+    (*(players[0])).rank = 1;
+    (*(players[1])).rank = 2;
+    (*(players[2])).rank = 3;
+    (*(players[3])).rank = 4;
     return;
 }
 
