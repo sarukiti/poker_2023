@@ -37,6 +37,35 @@ player_t player_init(){
     return player;
 }
 
+hand_t flash_hand_judge(...){
+    card_t cards[opened_card_count];
+    va_list ap;
+    va_start(ap);
+    for(int i = 0; i < opened_card_count; i++){
+        cards[i] = va_arg(ap, card_t);
+    }
+    va_end(ap);
+
+    int same_count = 0;
+    for (int i = 0; i < opened_card_count; i++) {
+        if (cards[i].suit == cards[i+1].suit) same_count++;
+    }
+    if(same_count >= 5) return FLASH;
+    else return NONE;
+}
+
+hand_t straight_hand_judge(...){
+    card_t cards[opened_card_count];
+    va_list ap;
+    va_start(ap);
+    for(int i = 0; i < opened_card_count; i++){
+        cards[i] = va_arg(ap, card_t);
+    }
+    va_end(ap);
+    
+
+}
+
 hand_t pair_hand_judge(...){
     card_t cards[opened_card_count];
     va_list ap;
@@ -75,55 +104,71 @@ void community_card_open(){
     opened_card_count++;
 }
 
-void hand_evaluation(player_t* player){
-    hand_t ref = NONE;
+hand_t call_pair_hand_judge(player_t* player){
     switch(opened_card_count){
         case 7:
-            ref = pair_hand_judge((*player).hand_card[0], (*player).hand_card[1], community_card[0], community_card[1], community_card[2], community_card[3], community_card[4]);
-            break;
+            return pair_hand_judge((*player).hand_card[0], (*player).hand_card[1], community_card[0], community_card[1], community_card[2], community_card[3], community_card[4]);
         case 6:
-            ref = pair_hand_judge((*player).hand_card[0], (*player).hand_card[1], community_card[0], community_card[1], community_card[2], community_card[3]);
-            break;
+            return pair_hand_judge((*player).hand_card[0], (*player).hand_card[1], community_card[0], community_card[1], community_card[2], community_card[3]);
         case 5:
-            ref = pair_hand_judge((*player).hand_card[0], (*player).hand_card[1], community_card[0], community_card[1], community_card[2]);
-            break;
+            return pair_hand_judge((*player).hand_card[0], (*player).hand_card[1], community_card[0], community_card[1], community_card[2]);
         case 4:
-            ref = pair_hand_judge((*player).hand_card[0], (*player).hand_card[1], community_card[0], community_card[1]);
-            break;
+            return pair_hand_judge((*player).hand_card[0], (*player).hand_card[1], community_card[0], community_card[1]);
         case 3:
-            ref = pair_hand_judge((*player).hand_card[0], (*player).hand_card[1], community_card[0]);
-            break;
+            return pair_hand_judge((*player).hand_card[0], (*player).hand_card[1], community_card[0]);
         case 2:
-            ref = pair_hand_judge((*player).hand_card[0], (*player).hand_card[1]);
-            break;
+            return pair_hand_judge((*player).hand_card[0], (*player).hand_card[1]);
+        default:
+            return NONE;
     }
+}
 
+hand_t call_flash_hand_judge(player_t* player){
+    switch(opened_card_count){
+        case 7:
+            return flash_hand_judge((*player).hand_card[0], (*player).hand_card[1], community_card[0], community_card[1], community_card[2], community_card[3], community_card[4]);
+        case 6:
+            return flash_hand_judge((*player).hand_card[0], (*player).hand_card[1], community_card[0], community_card[1], community_card[2], community_card[3]);
+        case 5:
+            return flash_hand_judge((*player).hand_card[0], (*player).hand_card[1], community_card[0], community_card[1], community_card[2]);
+        default:
+            return NONE;
+    }
+}
+
+void hand_evaluation(player_t* player){
+    hand_t pair_ref = call_pair_hand_judge(player);
+    hand_t flash_ref = call_flash_hand_judge(player);
     //ロイヤルストレートフラッシュ
     //ストレートフラッシュ
     //フォーカード
-    if(ref == FOUR_CARD){
+    if(pair_ref == FOUR_CARD){
         (*player).hand = FOUR_CARD;
         return;
     }
     //フルハウス
-    if(ref == FULLHOUSE){
+    if(pair_ref == FULLHOUSE){
         (*player).hand = FULLHOUSE;
         return;
     }
     //フラッシュ
+    if(flash_ref == FLASH){
+        (*player).hand = FLASH;
+        return;
+    }
     //ストレート
     //スリーカード
-    if(ref == THREE_CARD){
+    if(pair_ref == THREE_CARD){
         (*player).hand = THREE_CARD;
         return;
     }
     //ツーペア
-    if(ref == TWO_PAIR){
+    if(pair_ref == TWO_PAIR){
         (*player).hand = TWO_PAIR;
         return;
     }
     //ペア
-    if(ref == ONE_PAIR){
+    if(pair_ref == ONE_PAIR){
         (*player).hand = ONE_PAIR;
         return;
     }
@@ -176,12 +221,19 @@ int main(void){
     srand((unsigned int)time(NULL));
     shuffle_stock(stock);
     player_t player1 = player_init();
+    player_t player2 = player_init();
+    player_t player3 = player_init();
+    player_t player4 = player_init();
     community_card_open();
     community_card_open();
     community_card_open();
     community_card_open();
     community_card_open();
     hand_evaluation(&player1);
+    hand_evaluation(&player2);
+    hand_evaluation(&player3);
+    hand_evaluation(&player4);
+    player_rank_evaluation(&player1, &player2, &player3, &player4);
     return 0;
 }
 

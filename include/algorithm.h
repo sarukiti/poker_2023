@@ -1,6 +1,5 @@
-int max(int a, int b){
-    return (a >= b) ? a : b;
-}
-int min(int a, int b){
-    return (a <= b) ? a : b;
-}
+#pragma once
+#include <poker_type.h>
+
+int compare_player_rank(const void *x, const void *y);
+int compare_card(const void *x, const void *y);
