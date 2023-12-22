@@ -10,6 +10,10 @@
 
 #include "game_system.h"
 
+bool is_ahigh_straight = false;
+int latch = 0;
+int max_latch = 0;
+
 void shuffle_stock(card_t* stock){
     int n = 52;
     for (int i = n-1; i > 0; i--) {
@@ -37,6 +41,11 @@ player_t player_init(){
     };
     opened_card_count = 2;
     return player;
+}
+
+void community_card_open(){
+    community_card[opened_card_count-2] = draw_card();
+    opened_card_count++;
 }
 
 hand_t flash_hand_judge(...){
@@ -116,29 +125,6 @@ hand_t pair_hand_judge(...){
     }
 }
 
-void community_card_open(){
-    community_card[opened_card_count-2] = draw_card();
-    opened_card_count++;
-}
-
-hand_t call_pair_hand_judge(player_t* player){
-    switch(opened_card_count){
-        case 7:
-            return pair_hand_judge((*player).hand_card[0], (*player).hand_card[1], community_card[0], community_card[1], community_card[2], community_card[3], community_card[4]);
-        case 6:
-            return pair_hand_judge((*player).hand_card[0], (*player).hand_card[1], community_card[0], community_card[1], community_card[2], community_card[3]);
-        case 5:
-            return pair_hand_judge((*player).hand_card[0], (*player).hand_card[1], community_card[0], community_card[1], community_card[2]);
-        case 4:
-            return pair_hand_judge((*player).hand_card[0], (*player).hand_card[1], community_card[0], community_card[1]);
-        case 3:
-            return pair_hand_judge((*player).hand_card[0], (*player).hand_card[1], community_card[0]);
-        case 2:
-            return pair_hand_judge((*player).hand_card[0], (*player).hand_card[1]);
-        default:
-            return NONE;
-    }
-}
 hand_t call_flash_hand_judge(player_t* player){
     switch(opened_card_count){
         case 7:
@@ -159,6 +145,25 @@ hand_t call_straight_hand_judge(player_t* player){
             return straight_hand_judge((*player).hand_card[0], (*player).hand_card[1], community_card[0], community_card[1], community_card[2], community_card[3]);
         case 5:
             return straight_hand_judge((*player).hand_card[0], (*player).hand_card[1], community_card[0], community_card[1], community_card[2]);
+        default:
+            return NONE;
+    }
+}
+
+hand_t call_pair_hand_judge(player_t* player){
+    switch(opened_card_count){
+        case 7:
+            return pair_hand_judge((*player).hand_card[0], (*player).hand_card[1], community_card[0], community_card[1], community_card[2], community_card[3], community_card[4]);
+        case 6:
+            return pair_hand_judge((*player).hand_card[0], (*player).hand_card[1], community_card[0], community_card[1], community_card[2], community_card[3]);
+        case 5:
+            return pair_hand_judge((*player).hand_card[0], (*player).hand_card[1], community_card[0], community_card[1], community_card[2]);
+        case 4:
+            return pair_hand_judge((*player).hand_card[0], (*player).hand_card[1], community_card[0], community_card[1]);
+        case 3:
+            return pair_hand_judge((*player).hand_card[0], (*player).hand_card[1], community_card[0]);
+        case 2:
+            return pair_hand_judge((*player).hand_card[0], (*player).hand_card[1]);
         default:
             return NONE;
     }
@@ -229,19 +234,23 @@ void player_rank_evaluation(player_t* player1, player_t* player2, player_t* play
     return;
 }
 
-//[test]
-int main(void){
-    srand((unsigned int)time(NULL));
-    shuffle_stock(stock);
-    player_t player1 = player_init();
-    community_card_open();
-    community_card_open();
-    community_card_open();
-    community_card_open();
-    community_card_open();
-
-    hand_evaluation(&player1);
-    return 0;
+void check(player_t *player){
+    return;
+}
+void raise(player_t *player, int raise_latch){
+    (*player).coin-=raise_latch;
+    latch+=raise_latch;
+    max_latch = max(raise_latch, max_latch);
+    return;
+}
+void call(player_t *player){
+    (*player).coin-=max_latch;
+    latch+=max_latch;
+    return;
+}
+void falled(player_t *player){
+    (*player).state = FALLED;
+    return;
 }
 
 //まず全員6000コイン出す

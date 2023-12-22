@@ -13,8 +13,10 @@
                 "-g",
                 "algorithm.c",
                 "game_system.c",
+                "stock.c",
+                "main.c",
                 "-o",
-                "${fileDirname}/${fileBasenameNoExtension}"
+                "${fileDirname}/../build/${fileBasenameNoExtension}"
             ],
             "options": {
                 "cwd": "${fileDirname}"

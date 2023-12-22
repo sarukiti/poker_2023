@@ -1,3 +1,5 @@
+#include "poker_type.h"
+
 #include "algorithm.h"
 
 int max(int a, int b){
