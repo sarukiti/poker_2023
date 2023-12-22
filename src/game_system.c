@@ -8,6 +8,8 @@
 #include "algorithm.h"
 #include "stock.h"
 
+#include "game_system.h"
+
 void shuffle_stock(card_t* stock){
     int n = 52;
     for (int i = n-1; i > 0; i--) {
@@ -46,12 +48,14 @@ hand_t flash_hand_judge(...){
     }
     va_end(ap);
 
-    int same_count = 0;
-    for (int i = 0; i < opened_card_count; i++) {
-        if (cards[i].suit == cards[i+1].suit) same_count++;
+    size_t suit_same_count[4] = {0};
+    for(int i = 0; i < opened_card_count; i++){
+        suit_same_count[cards[i].suit]++;
     }
-    if(same_count >= 5) return FLASH;
-    else return NONE;
+    for(int i = 0; i < 4; i++){
+        if(suit_same_count[i] >= 5) return FLASH;
+    }
+    return NONE;
 }
 
 hand_t straight_hand_judge(...){
@@ -62,8 +66,21 @@ hand_t straight_hand_judge(...){
         cards[i] = va_arg(ap, card_t);
     }
     va_end(ap);
-    
 
+    qsort(cards, opened_card_count, sizeof(card_t), compare_card);
+    
+    is_ahigh_straight = cards[opened_card_count - 1].number == 14; //ロイヤルストレートフラッシュ判定用
+
+    int straight_count = 0;
+    for(int i = 0; i < opened_card_count - 2; i++){
+        if(cards[i + 1].number - cards[i].number == 1){
+            straight_count++;
+        }
+    }
+    if(cards[opened_card_count - 1].number - cards[opened_card_count - 2].number == 1 || (cards[opened_card_count - 2].number == 5 && cards[opened_card_count - 1].number == 14)){
+        straight_count++;
+    }
+    return straight_count >= 4 ? STRAIGHT : NONE;
 }
 
 hand_t pair_hand_judge(...){
@@ -122,7 +139,6 @@ hand_t call_pair_hand_judge(player_t* player){
             return NONE;
     }
 }
-
 hand_t call_flash_hand_judge(player_t* player){
     switch(opened_card_count){
         case 7:
@@ -135,12 +151,34 @@ hand_t call_flash_hand_judge(player_t* player){
             return NONE;
     }
 }
+hand_t call_straight_hand_judge(player_t* player){
+    switch(opened_card_count){
+        case 7:
+            return straight_hand_judge((*player).hand_card[0], (*player).hand_card[1], community_card[0], community_card[1], community_card[2], community_card[3], community_card[4]);
+        case 6:
+            return straight_hand_judge((*player).hand_card[0], (*player).hand_card[1], community_card[0], community_card[1], community_card[2], community_card[3]);
+        case 5:
+            return straight_hand_judge((*player).hand_card[0], (*player).hand_card[1], community_card[0], community_card[1], community_card[2]);
+        default:
+            return NONE;
+    }
+}
 
 void hand_evaluation(player_t* player){
-    hand_t pair_ref = call_pair_hand_judge(player);
     hand_t flash_ref = call_flash_hand_judge(player);
+    hand_t straight_ref = call_straight_hand_judge(player);
+    hand_t pair_ref = call_pair_hand_judge(player);
+    hand_t straight_flash_ref = (straight_ref == STRAIGHT && flash_ref == FLASH) ? STRAIGHT_FLASH : NONE;
     //ロイヤルストレートフラッシュ
+    if(straight_flash_ref == STRAIGHT_FLASH && is_ahigh_straight){
+        (*player).hand = ROYAL_STRAIGHT_FLASH;
+        return;
+    }
     //ストレートフラッシュ
+    if(straight_flash_ref == STRAIGHT_FLASH){
+        (*player).hand = STRAIGHT_FLASH;
+        return;
+    }
     //フォーカード
     if(pair_ref == FOUR_CARD){
         (*player).hand = FOUR_CARD;
@@ -157,6 +195,10 @@ void hand_evaluation(player_t* player){
         return;
     }
     //ストレート
+    if(straight_ref == STRAIGHT){
+        (*player).hand = STRAIGHT;
+        return;
+    }
     //スリーカード
     if(pair_ref == THREE_CARD){
         (*player).hand = THREE_CARD;
@@ -192,19 +234,13 @@ int main(void){
     srand((unsigned int)time(NULL));
     shuffle_stock(stock);
     player_t player1 = player_init();
-    player_t player2 = player_init();
-    player_t player3 = player_init();
-    player_t player4 = player_init();
     community_card_open();
     community_card_open();
     community_card_open();
     community_card_open();
     community_card_open();
+
     hand_evaluation(&player1);
-    hand_evaluation(&player2);
-    hand_evaluation(&player3);
-    hand_evaluation(&player4);
-    player_rank_evaluation(&player1, &player2, &player3, &player4);
     return 0;
 }
 

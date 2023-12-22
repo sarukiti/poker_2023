@@ -1,0 +1,1 @@
+bool is_ahigh_straight = false;
