@@ -16,7 +16,7 @@
                 "stock.c",
                 "main.c",
                 "-o",
-                "${fileDirname}/../build/${fileBasenameNoExtension}"
+                "${fileDirname}/../build/main"
             ],
             "options": {
                 "cwd": "${fileDirname}"
