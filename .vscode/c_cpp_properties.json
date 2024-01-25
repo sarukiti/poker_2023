@@ -8,7 +8,12 @@
             ],
             "compilerPath": "/home/sarukiti/.local/bin/gcc-13.2.0/bin/gcc",
             "cStandard": "c23",
-            "intelliSenseMode": "linux-gcc-x64"
+            "intelliSenseMode": "linux-gcc-x64",
+            "defines": [
+                "true=1",
+                "false=0",
+                "constexpr=const"
+            ]
         }
     ],
     "version": 4

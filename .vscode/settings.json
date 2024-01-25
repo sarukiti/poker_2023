@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "poker_type.h": "c",
+        "utils.h": "c",
+        "stdbool.h": "c"
+    }
+}
