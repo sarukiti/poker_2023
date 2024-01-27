@@ -42,6 +42,10 @@ const char* get_hand_string(hand_t hand){
     }
 }
 
-void print_prompt(const char* prompt){
-    printf("%s\n> ", prompt);
+void print_prompt(const char* prompt, int* buf){
+    char input[1024];
+    do{
+        printf("%s\n> ", prompt);
+        fgets(input, 1024, stdin);
+    }while(sscanf(input, "%d", buf) != 1);
 }

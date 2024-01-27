@@ -9,7 +9,7 @@ typedef enum hand{
 }hand_t;
 
 typedef enum player_state {
-    FALLED, PLAYING
+    FALLED, PLAYING, RETIREMENT
 }player_state_t;
 
 typedef struct card {
@@ -19,8 +19,8 @@ typedef struct card {
 
 typedef struct player {
     unsigned int player_number;
-    unsigned int coin;
-    unsigned int latch;
+    int coin;
+    int latch;
     card_t hand_card[2];
     hand_t hand;
     unsigned int rank;

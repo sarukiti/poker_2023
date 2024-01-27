@@ -30,6 +30,37 @@
                 "isDefault": true
             },
             "detail": "デバッガーによって生成されたタスク。"
+        },
+        {
+            "type": "cppbuild",
+            "label": "C/C++: poker_2023 test.",
+            "command": "/home/sarukiti/.local/bin/gcc-13.2.0/bin/gcc",
+            "args": [
+                "-fdiagnostics-color=always",
+                "-std=c2x",
+                "-I",
+                "${workspaceFolder}/include",
+                "-lm",
+                "-g",
+                "algorithm.c",
+                "game_system.c",
+                "stock.c",
+                "utils.c",
+                "../test/test.c",
+                "-o",
+                "${fileDirname}/../build/test"
+            ],
+            "options": {
+                "cwd": "${fileDirname}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "さたーんによって生成されたタスク。"
         }
     ],
     "version": "2.0.0"

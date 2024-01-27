@@ -21,24 +21,25 @@ int main(void){
     player_t* players[6] = {&player1, &player2, &player3, &player4, &player5, &player6};
     
     game_init(players);
-    //while(true){
+    while(true){
         switch(preflop(players)){
             case SUCCESS:
                 printf("フロップに入ります\n");
                 switch(flop(players)){
                     case ALMOST_FALLED:
-                        printf("みんな死にました\n");
+                        almost_falled(players);
                         break;
                     case SHOWDOWN:
                         printf("ショーダウンに入ります\n");
+                        showdown(players);
                         break;
                 };
                 break;
             case ALMOST_FALLED:
-                printf("みんな死にました\n");
+                almost_falled(players);
                 break;
         }
-        //next_game(players);
-    //}
+        next_game(players);
+    }
     return 0;
 }
