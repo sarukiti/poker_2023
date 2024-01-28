@@ -18,25 +18,25 @@ const char* get_suit_string(suit_t suit){
 const char* get_hand_string(hand_t hand){
     switch(hand){
         case HIGH_CARD:
-            return "HIGH_CARD";
+            return "\x1b[38;5;0mHIGH_CARD\x1b[39m";
         case ONE_PAIR:
-            return "ONE_PAIR";
+            return "\x1b[38;5;22mONE_PAIR\x1b[39m";
         case TWO_PAIR:
-            return "TWO_PAIR";
+            return "\x1b[38;5;10mTWO_PAIR\x1b[39m";
         case THREE_CARD:
-            return "THREE_CARD";
+            return "\x1b[38;5;24mTHREE_CARD\x1b[39m";
         case STRAIGHT:
-            return "STRAIGHT";
+            return "\x1b[38;5;38mSTRAIGHT\x1b[39m";
         case FLASH:
-            return "FLASH";
+            return "\x1b[38;5;27mFLASH\x1b[39m";
         case FULLHOUSE:
-            return "FULLHOUSE";
+            return "\x1b[38;5;56mFULLHOUSE\x1b[39m";
         case FOUR_CARD:
-            return "FOUR_CARD";
+            return "\x1b[38;5;128mFOUR_CARD\x1b[39m";
         case STRAIGHT_FLASH:
-            return "STRAIGHT_FLASH";
+            return "\x1b[38;5;226mSTRAIGHT_FLASH\x1b[39m";
         case ROYAL_STRAIGHT_FLASH:
-            return "ROYAL_STRAIGHT_FLASH";
+            return "\x1b[38;5;196mROYAL_STRAIGHT_FLASH\x1b[39m";
         default:
             return "NONE";
     }
