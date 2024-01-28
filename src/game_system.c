@@ -55,7 +55,6 @@ void game_init(player_t *players[PLAYER_COUNT]) {
 }
 
 int preflop(player_t *players[PLAYER_COUNT]) {
-    printf("\033[2J");
     while (true) {
         for(int i = retirement_count; i < PLAYER_COUNT; i++){
             if (player_action_select(players[i], NULL) == ALMOST_FALLED)
@@ -558,7 +557,10 @@ void next_game(player_t *players[PLAYER_COUNT]) {
     int turnend;
     while(true){
         print_prompt("次のターンが開始されます。よろしいですか？\nはい: 1, いいえ: 2\n", &turnend);
-        if(turnend == 1) break;
+        if(turnend == 1) {
+            printf("\033[2J");
+            break;
+        };
     } 
 }
 
