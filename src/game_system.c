@@ -399,6 +399,10 @@ void force_bet(player_t *player, int bet_latch) {
     is_bet = true;
 }
 int bet(player_t *player, int bet_latch) {
+    if(player->coin - before_latch < 0) {
+        printf("所持コインがマイナスなのでこれ以上賭けられません!\n");
+        return 0;
+    }
     if (((int)player->coin - (before_latch + bet_latch)) < 0) return -1;
     player->coin -= (before_latch + bet_latch);
     table_latch += (before_latch + bet_latch);
