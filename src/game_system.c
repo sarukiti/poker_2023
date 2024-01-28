@@ -55,6 +55,7 @@ void game_init(player_t *players[PLAYER_COUNT]) {
 }
 
 int preflop(player_t *players[PLAYER_COUNT]) {
+    printf("\033[2J");
     while (true) {
         for(int i = retirement_count; i < PLAYER_COUNT; i++){
             if (player_action_select(players[i], NULL) == ALMOST_FALLED)
@@ -495,7 +496,8 @@ void calc_player_profit(player_t* player){
 void showdown(player_t* players[6]){
     for(int i = 0; i < PLAYER_COUNT; i++){
         printf("player%dの手札\n", players[i]->player_number);
-        printf("%sの%d, %sの%d\n", get_suit_string(players[i]->hand_card[0].suit), players[i]->hand_card[0].number, get_suit_string(players[i]->hand_card[1].suit), players[i]->hand_card[1].number);
+        printf("  %sの%d, %sの%d (%s)\n", get_suit_string(players[i]->hand_card[0].suit), players[i]->hand_card[0].number, get_suit_string(players[i]->hand_card[1].suit), players[i]->hand_card[1].number, get_hand_string(players[i]->hand));
+        printf("\n");
         hand_evaluation(players[i]);
     }
     player_rank_evaluation(players);
@@ -552,6 +554,12 @@ void next_game(player_t *players[PLAYER_COUNT]) {
     }
     force_bet(players[4], FORCE_BET_LATCH);
     force_bet(players[5], FORCE_BET_LATCH * 2);
+    
+    int turnend;
+    while(true){
+        print_prompt("次のターンが開始されます。よろしいですか？\nはい: 1, いいえ: 2\n", &turnend);
+        if(turnend == 1) break;
+    } 
 }
 
 void finish_game(player_t *players[PLAYER_COUNT]) {
