@@ -12,6 +12,7 @@
 
 constexpr int PLAYER_COUNT = 6;
 constexpr int FORCE_BET_LATCH = 100;
+constexpr int PLAYER_INITIAL_COIN = 6000;
 
 bool is_ahigh_straight = false;
 bool is_bet = false;
@@ -127,8 +128,13 @@ card_t draw_card() { return stock[drawed_card_count++]; }
 
 player_t player_init(unsigned int player_number) {
     player_t player = {
-        player_number, 6000, 0,       {draw_card(), draw_card()},
-        HIGH_CARD,     0,    PLAYING,
+        player_number,
+        PLAYER_INITIAL_COIN,
+        0,
+        {draw_card(), draw_card()},
+        HIGH_CARD,
+        0,
+        PLAYING,
     };
     opened_card_count = 2;
     return player;
