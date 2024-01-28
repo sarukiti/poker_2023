@@ -194,9 +194,11 @@ hand_t straight_hand_judge(...) {
 
     int straight_count = 0;
     for (int i = 0; i < opened_card_count - 2; i++) {
-        if (cards[i + 1].number - cards[i].number <= 1) { //同じ数字があり得ることを考慮
+        if (cards[i + 1].number - cards[i].number == 1) { //同じ数字があり得ることを考慮
             straight_count++;
             if(straight_count >= 4) break;
+        }else if(cards[i + 1].number - cards[i].number == 0){
+            // 何もしない
         }else{
             straight_count = 0;
         }
