@@ -5,13 +5,13 @@
 const char* get_suit_string(suit_t suit){
     switch(suit){
         case SPADE:
-            return "SPADE";
+            return "\x1b[38;5;0mSPADE\x1b[39m";
         case HEART:
-            return "HEART";
+            return "\x1b[38;5;88mHEART\x1b[39m";
         case DIAMOND:
-            return "DIAMOND";
+            return "\x1b[38;5;37mDIAMOND\x1b[39m";
         case CLOVER:
-            return "CLOVER";
+            return "\x1b[38;5;64mCLOVER\x1b[39m";
     }
 }
 
