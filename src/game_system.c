@@ -370,13 +370,14 @@ void hand_evaluation(player_t *player) {
 }
 
 void player_rank_evaluation(player_t** players) {
-    player_t* sorted_players[player_count];
-    for(int i = retirement_count; i < player_count; i++){
-        sorted_players[i] = players[i];
+    player_t* sorted_players[player_count - retirement_count];
+    int j = retirement_count;
+    for(int i = 0; i < player_count - retirement_count; i++){
+        sorted_players[i] = players[j++];
     }
-    qsort(sorted_players, player_count, sizeof(player_t*), compare_player_rank);
+    qsort(sorted_players, player_count - retirement_count, sizeof(player_t*), compare_player_rank);
     int rank = 1;
-    for(int i = retirement_count; i < player_count - retirement_count; i++){
+    for(int i = 0; i < player_count - retirement_count; i++){
         sorted_players[i]->rank = rank++;
         if(sorted_players[i]->state != PLAYING) {
             sorted_players[i]->rank = -1;
