@@ -46,6 +46,9 @@ void print_prompt(const char* prompt, int* buf){
     char input[1024];
     do{
         printf("%s\n> ", prompt);
-        fgets(input, 1024, stdin);
+        while(true){
+            fgets(input, 1024, stdin);
+            if(input[0] != '\n') break;
+        }
     }while(sscanf(input, "%d", buf) != 1);
 }

@@ -1,5 +1,7 @@
 #pragma once
 
+#define PLAYER_COUNT 6
+
 typedef struct card card_t;
 typedef enum hand hand_t;
 typedef struct player player_t;
@@ -14,7 +16,7 @@ int preflop(player_t* players[6]);
 int flop(player_t* players[6]);
 bool is_all_latch_equal(player_t* players[6]);
 bool is_almost_player_falled(player_t* players[6]);
-player_t player_init(unsigned int player_number);
+player_t player_init(char* player_name);
 void player_reset(player_t* player);
 void community_card_open();
 void next_betting_round(player_t* players[6]);
