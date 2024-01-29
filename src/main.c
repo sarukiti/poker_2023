@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include "poker_type.h"
 #include "stock.h"
 #include "utils.h"
-#include "poker_type.h"
 #include "game_system.h"
 
 int main(void){

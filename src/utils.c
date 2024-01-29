@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "poker_type.h"
+
 #include "utils.h"
 
 const char* get_suit_string(suit_t suit){
