@@ -11,10 +11,11 @@
 
 #include "game_system.h"
 
-constexpr int PLAYER_COUNT = 6;
 constexpr int INITIAL_FORCE_BET_LATCH = 100;
 constexpr int PLAYER_INITIAL_COIN = 6000;
 
+
+int player_count = 0;
 bool is_ahigh_straight = false;
 bool is_bet = false;
 int before_latch = 0;
@@ -36,28 +37,28 @@ void shuffle_stock(card_t *stock) {
     drawed_card_count = 0;
 }
 
-void game_init(player_t *players[PLAYER_COUNT]) {
-    int random_dealer_button_select = rand() % PLAYER_COUNT;
+void game_init(player_t **players) {
+    int random_dealer_button_select = rand() % player_count;
 
-    force_bet(players[(random_dealer_button_select + 1) % PLAYER_COUNT],
+    force_bet(players[(random_dealer_button_select + 1) % player_count],
               INITIAL_FORCE_BET_LATCH);
-    force_bet(players[(random_dealer_button_select + 2) % PLAYER_COUNT],
+    force_bet(players[(random_dealer_button_select + 2) % player_count],
               INITIAL_FORCE_BET_LATCH * 2);
 
     // ビッグブラインドの左隣を先頭に
-    player_t *player_temp[PLAYER_COUNT];
-    for (int i = 0; i < PLAYER_COUNT; i++) {
+    player_t *player_temp[player_count];
+    for (int i = 0; i < player_count; i++) {
         player_temp[i] =
-            players[(random_dealer_button_select + 3 + i) % PLAYER_COUNT];
+            players[(random_dealer_button_select + 3 + i) % player_count];
     }
-    for (int i = 0; i < PLAYER_COUNT; i++) {
+    for (int i = 0; i < player_count; i++) {
         players[i] = player_temp[i];
     }
 }
 
-int preflop(player_t *players[PLAYER_COUNT]) {
+int preflop(player_t **players) {
     while (true) {
-        for(int i = retirement_count; i < PLAYER_COUNT; i++){
+        for(int i = retirement_count; i < player_count; i++){
             if (player_action_select(players[i], NULL) == ALMOST_FALLED)
                 return ALMOST_FALLED;
             if (is_all_latch_equal(players))
@@ -66,11 +67,11 @@ int preflop(player_t *players[PLAYER_COUNT]) {
     }
 }
 
-int flop(player_t *players[PLAYER_COUNT]) {
+int flop(player_t **players) {
     is_bet = false;
     before_latch = 0;
 
-    for(int i = 0; i < PLAYER_COUNT; i++){
+    for(int i = 0; i < player_count; i++){
         players[i]->latch = 0;
     }
 
@@ -80,7 +81,7 @@ int flop(player_t *players[PLAYER_COUNT]) {
 
     while (true) {
         int checked_count = 0;
-        for(int i = retirement_count; i < PLAYER_COUNT; i++){
+        for(int i = retirement_count; i < player_count; i++){
             if (player_action_select(players[i], &checked_count) == ALMOST_FALLED)
                 return ALMOST_FALLED;
             if (is_all_latch_equal(players)){
@@ -88,7 +89,7 @@ int flop(player_t *players[PLAYER_COUNT]) {
                 break;
             }
         }
-        if (checked_count == (PLAYER_COUNT - falled_count - retirement_count)) {
+        if (checked_count == (player_count - falled_count - retirement_count)) {
             if (opened_card_count == 7) {
                 return SHOWDOWN;
             }
@@ -99,20 +100,20 @@ int flop(player_t *players[PLAYER_COUNT]) {
     }
 }
 
-void next_betting_round(player_t* players[PLAYER_COUNT]){
+void next_betting_round(player_t** players){
     is_bet = false;
     before_latch = 0;
-    for(int i = 0; i < PLAYER_COUNT; i++){
+    for(int i = 0; i < player_count; i++){
         players[i]->latch = 0;
     }
     printf("\n");
 }
 
-bool is_all_latch_equal(player_t *players[PLAYER_COUNT]) {
+bool is_all_latch_equal(player_t **players) {
     int available_player_count = 0;
     int latch_equal_count = 0;
-    player_t *available_players[6];
-    for (int i = 0; i < 6; i++) {
+    player_t *available_players[player_count];
+    for (int i = 0; i < player_count; i++) {
         if (players[i]->state == PLAYING) {
             available_players[available_player_count] = players[i];
             available_player_count++;
@@ -368,14 +369,14 @@ void hand_evaluation(player_t *player) {
     return;
 }
 
-void player_rank_evaluation(player_t* players[PLAYER_COUNT]) {
-    player_t* sorted_players[PLAYER_COUNT];
-    for(int i = retirement_count; i < PLAYER_COUNT; i++){
+void player_rank_evaluation(player_t** players) {
+    player_t* sorted_players[player_count];
+    for(int i = retirement_count; i < player_count; i++){
         sorted_players[i] = players[i];
     }
-    qsort(sorted_players, PLAYER_COUNT, sizeof(player_t*), compare_player_rank);
+    qsort(sorted_players, player_count, sizeof(player_t*), compare_player_rank);
     int rank = 1;
-    for(int i = retirement_count; i < PLAYER_COUNT - retirement_count; i++){
+    for(int i = retirement_count; i < player_count - retirement_count; i++){
         sorted_players[i]->rank = rank++;
         if(sorted_players[i]->state != PLAYING) {
             sorted_players[i]->rank = -1;
@@ -482,7 +483,7 @@ int player_action_select(player_t *player, int *checked_count) {
         case 3:
             if(!is_bet) continue;
             falled(player);
-            if (falled_count + retirement_count >= (PLAYER_COUNT - 1)) {
+            if (falled_count + retirement_count >= (player_count - 1)) {
                 return ALMOST_FALLED;
             }
             break;
@@ -491,8 +492,8 @@ int player_action_select(player_t *player, int *checked_count) {
     return 0;
 }
 
-void almost_falled(player_t* players[6]){
-    for(int i = retirement_count; i < PLAYER_COUNT; i++){
+void almost_falled(player_t** players){
+    for(int i = retirement_count; i < player_count; i++){
         if(players[i]->state != FALLED) {
             calc_player_profit(players[i]);
         }
@@ -507,15 +508,15 @@ void calc_player_profit(player_t* player){
     return;
 }
 
-void showdown(player_t* players[6]){
-    for(int i = 0; i < PLAYER_COUNT; i++){
+void showdown(player_t** players){
+    for(int i = 0; i < player_count; i++){
         printf("%sの手札\n", players[i]->player_name);
         printf("  %sの%d, %sの%d (%s)\n", get_suit_string(players[i]->hand_card[0].suit), players[i]->hand_card[0].number, get_suit_string(players[i]->hand_card[1].suit), players[i]->hand_card[1].number, get_hand_string(players[i]->hand));
         printf("\n");
         hand_evaluation(players[i]);
     }
     player_rank_evaluation(players);
-    for(int i = retirement_count; i < PLAYER_COUNT; i++){
+    for(int i = retirement_count; i < player_count; i++){
         if(players[i]->rank == 1){
             printf("%sが勝利\n", players[i]->player_name);
             calc_player_profit(players[i]);
@@ -524,28 +525,28 @@ void showdown(player_t* players[6]){
     }
 }
 
-void next_game(player_t *players[PLAYER_COUNT]) {
+void next_game(player_t **players) {
     int retirement_counter = 0;
-    for (int i = 0; i < PLAYER_COUNT; i++) {
+    for (int i = 0; i < player_count; i++) {
         if(players[i]->coin <= 0) {
             players[i]->state = RETIREMENT;
             retirement_counter++;
         }
-        if(retirement_counter >= PLAYER_COUNT - 1) finish_game(players);
+        if(retirement_counter >= player_count - 1) finish_game(players);
     }
     retirement_count = retirement_counter;
 
     retirement_counter = 0;
     int playing_counter = 0;
-    player_t* temp[PLAYER_COUNT];
-    for(int i = 0; i < PLAYER_COUNT; i++){
+    player_t* temp[player_count];
+    for(int i = 0; i < player_count; i++){
         if(players[i]->state == RETIREMENT){
             temp[retirement_counter++] = players[i];
         }else{
-            temp[(retirement_count + playing_counter++) % PLAYER_COUNT] = players[i];
+            temp[(retirement_count + playing_counter++) % player_count] = players[i];
         }
     }
-    for(int i = 0; i < PLAYER_COUNT; i++){
+    for(int i = 0; i < player_count; i++){
         players[i] = temp[i];
     }
 
@@ -555,15 +556,15 @@ void next_game(player_t *players[PLAYER_COUNT]) {
     shuffle_stock(stock);
 
     // プレイヤーの状態をリセット
-    for (int i = retirement_count; i < PLAYER_COUNT; i++) {
+    for (int i = retirement_count; i < player_count; i++) {
         player_reset(players[i]);
     }
     // ディーラーボタンを左に移動
-    player_t *player_temp[PLAYER_COUNT];
-    for (int i = retirement_count; i < PLAYER_COUNT; i++) {
-        player_temp[i] = players[(i + 1) != PLAYER_COUNT ? (i + 1) : retirement_count];
+    player_t *player_temp[player_count];
+    for (int i = retirement_count; i < player_count; i++) {
+        player_temp[i] = players[(i + 1) != player_count ? (i + 1) : retirement_count];
     }
-    for (int i = retirement_count; i < PLAYER_COUNT; i++) {
+    for (int i = retirement_count; i < player_count; i++) {
         players[i] = player_temp[i];
     }
 
@@ -571,8 +572,8 @@ void next_game(player_t *players[PLAYER_COUNT]) {
     // ブラインドレベルはretirement_countと同じ
     int small_blind_force_bet_latch = INITIAL_FORCE_BET_LATCH * pow(2, retirement_count);
     int big_blind_force_bet_latch = 2 * small_blind_force_bet_latch;
-    force_bet(players[4], small_blind_force_bet_latch);
-    force_bet(players[5], big_blind_force_bet_latch);
+    force_bet(players[player_count - 2], small_blind_force_bet_latch);
+    force_bet(players[player_count - 1], big_blind_force_bet_latch);
     
     int turnend;
     while(true){
@@ -584,10 +585,10 @@ void next_game(player_t *players[PLAYER_COUNT]) {
     } 
 }
 
-void finish_game(player_t *players[PLAYER_COUNT]) {
+void finish_game(player_t **players) {
     // 勝者の判定
     player_t winner;
-    for(int i = 0; i < PLAYER_COUNT; i++){
+    for(int i = 0; i < player_count; i++){
         if(players[i]->state == PLAYING){
             printf("%sが勝利\n", players[i]->player_name);
             winner = *players[i];

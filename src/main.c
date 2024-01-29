@@ -13,7 +13,10 @@ int main(void){
 
     player_t players[6];
     player_t* players_addr[6];
-    for(int i = 0; i < PLAYER_COUNT; i++){
+
+    print_prompt("プレイヤーの人数を入力してください(2~)", &player_count);
+
+    for(int i = 0; i < player_count; i++){
         char player_name[1024];
         printf("プレイヤー%dの名前を入力してください\n> ", i + 1);
         scanf("%s", player_name);
