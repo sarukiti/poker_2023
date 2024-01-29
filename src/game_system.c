@@ -515,11 +515,8 @@ void calc_player_profit(player_t* player){
 }
 
 void showdown(player_t** players){
-    for(int i = 0; i <5; i++){
-        printf("コミュニティカードの%d枚目は%sの%d\n",
-                i + 1,
-                get_suit_string(community_card[i].suit),
-                community_card[i].number);
+    for(int i = 0; i < 5; i++){
+        printf("コミュニティカードの%d枚目は%sの%d\n", i + 1, get_suit_string(community_card[i].suit), community_card[i].number);
     }
     for(int i = 0; i < player_count; i++){
         printf("%sの手札\n", players[i]->player_name);
