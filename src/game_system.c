@@ -10,7 +10,6 @@
 
 #include "game_system.h"
 
-constexpr int PLAYER_COUNT = 6;
 constexpr int FORCE_BET_LATCH = 100;
 constexpr int PLAYER_INITIAL_COIN = 6000;
 
@@ -126,9 +125,9 @@ bool is_all_latch_equal(player_t *players[PLAYER_COUNT]) {
 
 card_t draw_card() { return stock[drawed_card_count++]; }
 
-player_t player_init(unsigned int player_number) {
+player_t player_init(char* player_name) {
     player_t player = {
-        player_number,
+        "",
         PLAYER_INITIAL_COIN,
         0,
         {draw_card(), draw_card()},
@@ -136,6 +135,7 @@ player_t player_init(unsigned int player_number) {
         0,
         PLAYING,
     };
+    snprintf(player.player_name, 1024, "%s", player_name);
     opened_card_count = 2;
     return player;
 }
@@ -430,11 +430,11 @@ int player_action_select(player_t *player, int *checked_count) {
            player->hand_card[0].number,
            get_suit_string(player->hand_card[1].suit),
            player->hand_card[1].number);
-    printf("player%dが持っているコインは%d枚\n", player->player_number, player->coin);
-    printf("player%dがコールしたときに賭けるコインは%d枚\n", player->player_number, before_latch - player->latch);
+    printf("%sが持っているコインは%d枚\n", player->player_name, player->coin);
+    printf("%sがコールしたときに賭けるコインは%d枚\n", player->player_name, before_latch - player->latch);
     printf("掛け金に対する操作を選んでください\n");
 
-    printf("player%dの操作\n", player->player_number);
+    printf("%sの操作\n", player->player_name);
 
     if (player->state != PLAYING) {
         printf("フォールド.\n");
@@ -487,14 +487,15 @@ void almost_falled(player_t* players[6]){
 
 void calc_player_profit(player_t* player){
     player->coin += table_latch;
-    printf("player%dがコイン%d枚を獲得\n", player->player_number, table_latch);
+    printf("%sがコイン%d枚を獲得\n", player->player_name, table_latch);
+    printf("\n");
     table_latch = 0;
     return;
 }
 
 void showdown(player_t* players[6]){
     for(int i = 0; i < PLAYER_COUNT; i++){
-        printf("player%dの手札\n", players[i]->player_number);
+        printf("%sの手札\n", players[i]->player_name);
         printf("  %sの%d, %sの%d (%s)\n", get_suit_string(players[i]->hand_card[0].suit), players[i]->hand_card[0].number, get_suit_string(players[i]->hand_card[1].suit), players[i]->hand_card[1].number, get_hand_string(players[i]->hand));
         printf("\n");
         hand_evaluation(players[i]);
@@ -502,7 +503,7 @@ void showdown(player_t* players[6]){
     player_rank_evaluation(players);
     for(int i = retirement_count; i < PLAYER_COUNT; i++){
         if(players[i]->rank == 1){
-            printf("player%dが勝利\n", players[i]->player_number);
+            printf("%sが勝利\n", players[i]->player_name);
             calc_player_profit(players[i]);
             break;        
         }
@@ -556,7 +557,7 @@ void next_game(player_t *players[PLAYER_COUNT]) {
     
     int turnend;
     while(true){
-        print_prompt("次のターンが開始されます。よろしいですか？\nはい: 1, いいえ: 2\n", &turnend);
+        print_prompt("次のターンが開始されます。よろしいですか？\nはい: 1, いいえ: 2", &turnend);
         if(turnend == 1) {
             printf("\033[2J");
             break;
@@ -569,14 +570,14 @@ void finish_game(player_t *players[PLAYER_COUNT]) {
     player_t winner;
     for(int i = 0; i < PLAYER_COUNT; i++){
         if(players[i]->state == PLAYING){
-            printf("player%dが勝利\n", players[i]->player_number);
+            printf("%sが勝利\n", players[i]->player_name);
             winner = *players[i];
             break;
         }
     }
     FILE *fp;
     fp = fopen("result.log", "w");
-    fprintf(fp, "勝者はplayer%dです\n", winner.player_number);
+    fprintf(fp, "勝者は%sです\n", winner.player_name);
     fclose(fp);
     // ファイル書き出し
     exit(0);

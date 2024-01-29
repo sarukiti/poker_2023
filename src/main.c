@@ -11,35 +11,36 @@ int main(void){
     srand((unsigned int)time(NULL));
     shuffle_stock(stock);
 
-    player_t player1 = player_init(1);
-    player_t player2 = player_init(2);
-    player_t player3 = player_init(3);
-    player_t player4 = player_init(4);
-    player_t player5 = player_init(5);
-    player_t player6 = player_init(6);
-
-    player_t* players[6] = {&player1, &player2, &player3, &player4, &player5, &player6};
+    player_t players[6];
+    player_t* players_addr[6];
+    for(int i = 0; i < PLAYER_COUNT; i++){
+        char player_name[1024];
+        printf("プレイヤー%dの名前を入力してください\n> ", i + 1);
+        scanf("%s", player_name);
+        players[i] = player_init(player_name);
+        players_addr[i] = &players[i];
+    }
     
-    game_init(players);
+    game_init(players_addr);
     while(true){
-        switch(preflop(players)){
+        switch(preflop(players_addr)){
             case SUCCESS:
-                printf("フロップに入ります\n");
-                switch(flop(players)){
+                printf("フロップに入ります\n");        
+                switch(flop(players_addr)){
                     case ALMOST_FALLED:
-                        almost_falled(players);
+                        almost_falled(players_addr);
                         break;
                     case SHOWDOWN:
                         printf("ショーダウンに入ります\n");
-                        showdown(players);
+                        showdown(players_addr);
                         break;
                 };
                 break;
             case ALMOST_FALLED:
-                almost_falled(players);
+                almost_falled(players_addr);
                 break;
         }
-        next_game(players);
+        next_game(players_addr);
     }
     return 0;
 }

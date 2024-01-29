@@ -18,7 +18,7 @@ typedef struct card {
 }card_t;
 
 typedef struct player {
-    unsigned int player_number;
+    char player_name[1024];
     int coin;
     int latch;
     card_t hand_card[2];
