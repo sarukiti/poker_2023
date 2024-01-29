@@ -32,5 +32,5 @@ enum return_status {
 };
 
 enum bet_return_status {
-    BET_SUCCESS = 0, LATCH_TOO_MUCH = -1, LATCH_MINUS = -2, HAVING_COIN_MINUS = -3
+    BET_SUCCESS = 0, LATCH_TOO_MUCH = -1, LATCH_MINUS = -2, HAVING_COIN_MINUS = -3, LATCH_ZERO = -4
 };
