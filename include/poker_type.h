@@ -30,3 +30,7 @@ typedef struct player {
 enum return_status {
     SUCCESS, ALMOST_FALLED, SHOWDOWN
 };
+
+enum bet_return_status {
+    BET_SUCCESS = 0, LATCH_TOO_MUCH = -1, LATCH_MINUS = -2, HAVING_COIN_MINUS = -3
+};
