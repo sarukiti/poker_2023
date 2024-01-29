@@ -443,6 +443,9 @@ int player_action_select(player_t *player, int *checked_count) {
             break;
         };
     }
+    for(int i = 0; i < opened_card_count - 2; i++){
+        printf("コミュニティカードの%d枚目は%sの%d\n", i + 1, get_suit_string(community_card[i].suit), community_card[i].number);
+    }
     printf("今の役は%s\n", get_hand_string(player->hand));
 
     printf("手札は%sの%dと%sの%d\n", get_suit_string(player->hand_card[0].suit),
