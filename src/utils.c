@@ -9,9 +9,9 @@ const char* get_suit_string(suit_t suit){
         case HEART:
             return "\x1b[38;5;88mHEART\x1b[39m";
         case DIAMOND:
-            return "\x1b[38;5;37mDIAMOND\x1b[39m";
+            return "\x1b[38;5;88mDIAMOND\x1b[39m";
         case CLOVER:
-            return "\x1b[38;5;64mCLOVER\x1b[39m";
+            return "\x1b[38;5;0mCLOVER\x1b[39m";
     }
 }
 
