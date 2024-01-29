@@ -11,10 +11,14 @@ int main(void){
     srand((unsigned int)time(NULL));
     shuffle_stock(stock);
 
-    player_t players[6];
-    player_t* players_addr[6];
+    while(true){
+        print_prompt("プレイヤーの人数を入力してください(2~)", &player_count);
+        if(player_count >= 2) break;
+        else printf("2より小さい数字を入力しないでください.\n");
+    }
 
-    print_prompt("プレイヤーの人数を入力してください(2~)", &player_count);
+    player_t players[player_count];
+    player_t* players_addr[player_count];
 
     for(int i = 0; i < player_count; i++){
         char player_name[1024];
