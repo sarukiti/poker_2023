@@ -51,7 +51,7 @@
                 "${fileDirname}/../build/test"
             ],
             "options": {
-                "cwd": "${fileDirname}"
+                "cwd": "${fileDirname}/../src"
             },
             "problemMatcher": [
                 "$gcc"
