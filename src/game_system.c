@@ -432,7 +432,6 @@ void falled(player_t *player) {
 int player_action_select(player_t *player, int *checked_count) {
     int select = 0;
     int local_latch = 0;
-
     hand_evaluation(player);
     int player_clear;
     if (player->state != PLAYING) {
@@ -461,10 +460,6 @@ int player_action_select(player_t *player, int *checked_count) {
 
     printf("%sの操作\n", player->player_name);
 
-    if (player->state != PLAYING) {
-        printf("フォールド.\n");
-        return 0;
-    }
     while ((!(select > 0 && select < 4) && is_bet) || (!(select > 0 && select < 3) && !is_bet)) {
         if (!is_bet)
             print_prompt("チェック: 1, ベット: 2", &select);
