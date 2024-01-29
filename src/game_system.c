@@ -403,6 +403,7 @@ void force_bet(player_t *player, int bet_latch) {
 }
 int bet(player_t *player, int bet_latch) {
     if(player->coin - before_latch < 0) return HAVING_COIN_MINUS;
+    if(bet_latch == 0) return LATCH_ZERO;
     if(bet_latch < 0) return LATCH_MINUS;
     if (((int)player->coin - (before_latch + bet_latch)) < 0) return LATCH_TOO_MUCH;
 
@@ -473,6 +474,10 @@ int player_action_select(player_t *player, int *checked_count) {
                         continue;
                     case HAVING_COIN_MINUS:
                         printf("所持コインがマイナスなのでこれ以上賭け金を上乗せすることはできません!\n");
+                        select = 0;
+                        break;
+                    case LATCH_ZERO:
+                        printf("賭け金にゼロを指定することはできません.\n");
                         select = 0;
                         break;
                 }
