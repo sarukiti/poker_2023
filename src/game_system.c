@@ -398,7 +398,10 @@ void force_bet(player_t *player, int bet_latch) {
     is_bet = true;
 }
 int bet(player_t *player, int bet_latch) {
-    if (((int)player->coin - (before_latch + bet_latch)) < 0) return -1;
+    if(player->coin - before_latch < 0) return HAVING_COIN_MINUS;
+    if(bet_latch < 0) return LATCH_MINUS;
+    if (((int)player->coin - (before_latch + bet_latch)) < 0) return LATCH_TOO_MUCH;
+
     player->coin -= (before_latch + bet_latch);
     table_latch += (before_latch + bet_latch);
     player->latch += (before_latch + bet_latch);
@@ -457,12 +460,19 @@ int player_action_select(player_t *player, int *checked_count) {
         case 2:
             while(true){
                 print_prompt("掛け金を入力してください", &local_latch);
-                if(bet(player, local_latch) != 0){
-                    printf("コインが足りません\n");
-                    continue;
-                }else{
-                    break;
+                switch(bet(player, local_latch)){
+                    case LATCH_TOO_MUCH:
+                        printf("指定された賭け金は大きすぎます.\n");
+                        continue;
+                    case LATCH_MINUS:
+                        printf("賭け金にマイナスの額を指定することはできません.\n");
+                        continue;
+                    case HAVING_COIN_MINUS:
+                        printf("所持コインがマイナスなのでこれ以上賭け金を上乗せすることはできません!\n");
+                        select = 0;
+                        break;
                 }
+                break;
             };
             break;
         case 3:
