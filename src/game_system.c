@@ -434,6 +434,15 @@ int player_action_select(player_t *player, int *checked_count) {
     int local_latch = 0;
 
     hand_evaluation(player);
+    int player_clear;
+    while(true){
+        printf("%s", player->player_name);
+        print_prompt("の手札が表示されます。よろしいですか？\nはい: 1, いいえ: 2", &player_clear);
+        if(player_clear == 1) {
+            printf("\033[2J");
+            break;
+        };
+    }
     printf("今の役は%s\n", get_hand_string(player->hand));
 
     printf("手札は%sの%dと%sの%d\n", get_suit_string(player->hand_card[0].suit),
