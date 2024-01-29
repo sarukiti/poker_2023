@@ -38,8 +38,11 @@ int main(void){
                         almost_falled(players_addr);
                         break;
                     case SHOWDOWN:
-                        printf("ショーダウンに入ります\n");
+                        int showdown_check;
+                        print_prompt("ショーダウンに入ります。よろしいですか？\nはい: 1, いいえ: 2", &showdown_check);
+                        if(showdown_check == 1){
                         showdown(players_addr);
+                        }
                         break;
                 };
                 break;
