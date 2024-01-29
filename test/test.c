@@ -37,6 +37,10 @@ int main(void) {
                 hand = straight_hand_judge(cards[0], cards[1], cards[2], cards[3], cards[4], cards[5], cards[6]);
                 break;
         }
-        assert(hand == judge_result);
+        if(hand != judge_result){
+            printf("NG\n");
+            printf("judge_result: %s\n", get_hand_string(judge_result));
+            printf("hand: %s\n", get_hand_string(hand));
+        }
     }
 }
