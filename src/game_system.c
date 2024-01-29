@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 #include "algorithm.h"
 #include "poker_type.h"
@@ -11,7 +12,7 @@
 #include "game_system.h"
 
 constexpr int PLAYER_COUNT = 6;
-constexpr int FORCE_BET_LATCH = 100;
+constexpr int INITIAL_FORCE_BET_LATCH = 100;
 constexpr int PLAYER_INITIAL_COIN = 6000;
 
 bool is_ahigh_straight = false;
@@ -39,9 +40,9 @@ void game_init(player_t *players[PLAYER_COUNT]) {
     int random_dealer_button_select = rand() % PLAYER_COUNT;
 
     force_bet(players[(random_dealer_button_select + 1) % PLAYER_COUNT],
-              FORCE_BET_LATCH);
+              INITIAL_FORCE_BET_LATCH);
     force_bet(players[(random_dealer_button_select + 2) % PLAYER_COUNT],
-              FORCE_BET_LATCH * 2);
+              INITIAL_FORCE_BET_LATCH * 2);
 
     // ビッグブラインドの左隣を先頭に
     player_t *player_temp[PLAYER_COUNT];
@@ -563,8 +564,13 @@ void next_game(player_t *players[PLAYER_COUNT]) {
     for (int i = retirement_count; i < PLAYER_COUNT; i++) {
         players[i] = player_temp[i];
     }
-    force_bet(players[4], FORCE_BET_LATCH);
-    force_bet(players[5], FORCE_BET_LATCH * 2);
+
+    // スモールブラインドとビッグブラインドの強制ベット金額はブラインドレベルによって変化
+    // ブラインドレベルはretirement_countと同じ
+    int small_blind_force_bet_latch = INITIAL_FORCE_BET_LATCH * pow(2, retirement_count);
+    int big_blind_force_bet_latch = 2 * small_blind_force_bet_latch;
+    force_bet(players[4], small_blind_force_bet_latch);
+    force_bet(players[5], big_blind_force_bet_latch);
     
     int turnend;
     while(true){
