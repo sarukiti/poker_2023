@@ -11,7 +11,6 @@
 
 #include "game_system.h"
 
-
 constexpr int PLAYER_COUNT = 6;
 constexpr int INITIAL_FORCE_BET_LATCH = 100;
 constexpr int PLAYER_INITIAL_COIN = 6000;
