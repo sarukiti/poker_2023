@@ -12,9 +12,18 @@ int main(void){
     shuffle_stock(stock);
 
     while(true){
-        print_prompt("プレイヤーの人数を入力してください(2~)", &player_count);
-        if(player_count >= 2) break;
-        else printf("2より小さい数字を入力しないでください.\n");
+        print_prompt("プレイヤーの人数を入力してください(2~23)", &player_count);
+        if(player_count >= 2 && player_count < 24) break;
+        else if (player_count < 2)
+        {
+            printf("2より小さい数字を入力しないでください.\n");
+        }
+        else if (player_count >= 24)
+        {
+            printf("23より大きい数字を入力しないでください.\n");
+        }
+        
+         
     }
 
     player_t players[player_count];
@@ -26,6 +35,29 @@ int main(void){
         scanf("%s", player_name);
         players[i] = player_init(player_name);
         players_addr[i] = &players[i];
+        for (int j = 0; j < i; j++)
+        {
+            for (int k = 0; k < 1024; k++)
+            {
+                
+                if (players_addr[j]->player_name[k] == '\0')
+                {
+                    print_prompt("同じ名前があります．名前を入力しなおしてください", &player_name);
+                    players[i] = player_init(player_name);
+                    players_addr[i] = &players[i];
+                    char name[20] = "hello";
+                    scanf("%s", name);
+                    printf("%s", name);
+                }
+                
+                if (players_addr[i]->player_name[k] != players_addr[j]->player_name[k])
+                {
+                    break;
+                }
+            }
+            
+        }
+        
     }
     
     game_init(players_addr);
