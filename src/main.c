@@ -13,6 +13,7 @@ int main(void){
     shuffle_stock(stock);
 
     while(true){
+        printf("\x1b[40m");
         print_prompt("プレイヤーの人数を入力してください(2~23)", &player_count);
         if (player_count < 2){
             printf("2より小さい数字を入力しないでください.\n");
