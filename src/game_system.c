@@ -154,10 +154,6 @@ void player_reset(player_t *player) {
 
 void community_card_open() {
     community_card[opened_card_count - 2] = draw_card();
-    printf("コミュニティカードの%d枚目は%sの%d\n",
-                opened_card_count - 1,
-                get_suit_string(community_card[opened_card_count - 2].suit),
-                community_card[opened_card_count - 2].number);
     opened_card_count++;
 }
 
