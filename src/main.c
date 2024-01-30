@@ -58,9 +58,14 @@ int main(void){
                         break;
                     case SHOWDOWN:
                         int showdown_check;
-                        print_prompt("ショーダウンに入ります。よろしいですか？\nはい: 1, いいえ: 2", &showdown_check);
-                        if(showdown_check == 1){
-                            showdown(players_addr);
+                        while(true){
+                            print_prompt("ショーダウンに入ります。よろしいですか？\nはい: 1, いいえ: 2", &showdown_check);
+                            if(showdown_check == 1){
+                                showdown(players_addr);
+                            }else{
+                                continue;
+                            }
+                            break;
                         }
                         break;
                 };
