@@ -59,6 +59,7 @@ int main(void){
                     case SHOWDOWN:
                         int showdown_check;
                         while(true){
+                            printf("\033[2J");
                             print_prompt("ショーダウンに入ります。よろしいですか？\nはい: 1, いいえ: 2", &showdown_check);
                             if(showdown_check == 1){
                                 showdown(players_addr);
