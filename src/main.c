@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 #include "stock.h"
@@ -13,51 +14,37 @@ int main(void){
 
     while(true){
         print_prompt("プレイヤーの人数を入力してください(2~23)", &player_count);
-        if(player_count >= 2 && player_count < 24) break;
-        else if (player_count < 2)
-        {
+        if (player_count < 2){
             printf("2より小さい数字を入力しないでください.\n");
         }
-        else if (player_count >= 24)
-        {
+        else if (player_count >= 24){
             printf("23より大きい数字を入力しないでください.\n");
+        }else{
+            break;
         }
-        
-         
     }
 
     player_t players[player_count];
     player_t* players_addr[player_count];
 
     for(int i = 0; i < player_count; i++){
+        bool is_name_equal;
         char player_name[1024];
-        printf("プレイヤー%dの名前を入力してください\n> ", i + 1);
-        scanf("%s", player_name);
+        do{
+            printf("プレイヤー%dの名前を入力してください\n> ", i + 1);
+            scanf("%s", player_name);
+            for(int j = 0; j < i; j++){
+                if(strcmp(players_addr[j]->player_name, player_name) == 0){
+                    printf("同じ名前があります．名前を入力しなおしてください\n");
+                    is_name_equal = true;
+                }else{
+                    is_name_equal = false;
+                }
+                break;
+            }
+        }while(is_name_equal);
         players[i] = player_init(player_name);
         players_addr[i] = &players[i];
-        for (int j = 0; j < i; j++)
-        {
-            for (int k = 0; k < 1024; k++)
-            {
-                
-                if (players_addr[j]->player_name[k] == '\0')
-                {
-                    print_prompt("同じ名前があります．名前を入力しなおしてください", &player_name);
-                    players[i] = player_init(player_name);
-                    players_addr[i] = &players[i];
-                    char name[20] = "hello";
-                    scanf("%s", name);
-                    printf("%s", name);
-                }
-                
-                if (players_addr[i]->player_name[k] != players_addr[j]->player_name[k])
-                {
-                    break;
-                }
-            }
-            
-        }
-        
     }
     
     game_init(players_addr);
