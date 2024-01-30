@@ -57,13 +57,27 @@ void game_init(player_t **players) {
 }
 
 int preflop(player_t **players) {
+    int wave_counter = 1;
     while (true) {
         for(int i = retirement_count; i < player_count; i++){
+            int player_clear;
+            printf("\033[2J");
+            while(true){
+                printf("%s", players[i]->player_name);
+                print_prompt("の手札が表示されます。よろしいですか？\nはい: 1, いいえ: 2", &player_clear);
+                if(player_clear == 1) {
+                    printf("\033[2J");
+                    break;
+                };
+            }
+
+            printf("プリフロップ %dウェーブ %d人目: %s\n\n", wave_counter, i - retirement_count + 1, players[i]->player_name);
             if (player_action_select(players[i], NULL) == ALMOST_FALLED)
                 return ALMOST_FALLED;
             if (is_all_latch_equal(players))
                 return SUCCESS;
-            }
+        }
+        wave_counter++;
     }
 }
 
@@ -79,9 +93,23 @@ int flop(player_t **players) {
         community_card_open();
     }
 
+    int wave_counter = 0;
     while (true) {
+        wave_counter++;
         int checked_count = 0;
+        int player_clear;
+
         for(int i = retirement_count; i < player_count; i++){
+            printf("\033[2J");
+            while(players[i]->state == PLAYING){
+                printf("%s", players[i]->player_name);
+                print_prompt("の手札が表示されます。よろしいですか？\nはい: 1, いいえ: 2", &player_clear);
+                if(player_clear == 1) {
+                    printf("\033[2J");
+                    printf("フロップ %dウェーブ %d人目: %s\n\n", wave_counter, i - retirement_count + 1, players[i]->player_name);
+                    break;
+                };
+            }
             if (player_action_select(players[i], &checked_count) == ALMOST_FALLED)
                 return ALMOST_FALLED;
             if (is_all_latch_equal(players)){
@@ -183,7 +211,9 @@ hand_t straight_hand_judge(...) {
     va_start(ap);
     for (int i = 0; i < opened_card_count; i++) {
         cards[i] = va_arg(ap, card_t);
+        cards[i].number == 14 ? cards[i].number = 1 : cards[i].number;
     }
+    card_t* straight_card_array = va_arg(ap, card_t*);
     va_end(ap);
 
     qsort(cards, opened_card_count, sizeof(card_t), compare_card);
@@ -191,19 +221,17 @@ hand_t straight_hand_judge(...) {
     is_ahigh_straight = cards[opened_card_count - 1].number == 14; // ロイヤルストレートフラッシュ判定用
 
     int straight_count = 0;
-    for (int i = 0; i < opened_card_count - 2; i++) {
+    for (int i = 0; i < opened_card_count - 1; i++) {
         if (cards[i + 1].number - cards[i].number == 1) { //同じ数字があり得ることを考慮
+            straight_card_array[straight_count] = cards[i];
+            straight_card_array[straight_count + 1] = cards[i + 1];
             straight_count++;
             if(straight_count >= 4) break;
         }else if(cards[i + 1].number - cards[i].number == 0){
             // 何もしない
-        }else{
+        }else{   
             straight_count = 0;
         }
-    }
-    if ((cards[opened_card_count - 1].number - cards[opened_card_count - 2].number == 1) ||
-        (cards[opened_card_count - 2].number == 5 && cards[opened_card_count - 1].number == 14)) {
-        straight_count++;
     }
     return straight_count >= 4 ? STRAIGHT : NONE;
 }
@@ -241,6 +269,18 @@ hand_t pair_hand_judge(...) {
     }
 }
 
+hand_t straight_flash_hand_judge(hand_t straight_ref, card_t* straight_card_array) {
+    if( straight_ref == STRAIGHT &&
+        straight_card_array[0].suit == straight_card_array[1].suit &&
+        straight_card_array[1].suit == straight_card_array[2].suit &&
+        straight_card_array[2].suit == straight_card_array[3].suit &&
+        straight_card_array[3].suit == straight_card_array[4].suit){
+            return STRAIGHT_FLASH;
+        }else{
+            return NONE;
+        }
+}
+
 hand_t call_flash_hand_judge(player_t *player) {
     switch (opened_card_count) {
     case 7:
@@ -260,21 +300,28 @@ hand_t call_flash_hand_judge(player_t *player) {
         return NONE;
     }
 }
-hand_t call_straight_hand_judge(player_t *player) {
+hand_t call_straight_hand_judge(player_t *player, card_t* straight_card_array) {
     switch (opened_card_count) {
     case 7:
-        return straight_hand_judge((*player).hand_card[0],
-                                   (*player).hand_card[1], community_card[0],
-                                   community_card[1], community_card[2],
-                                   community_card[3], community_card[4]);
+        return straight_hand_judge(
+            (*player).hand_card[0], (*player).hand_card[1],
+            community_card[0], community_card[1],
+            community_card[2], community_card[3],
+            community_card[4], straight_card_array
+        );
     case 6:
         return straight_hand_judge(
-            (*player).hand_card[0], (*player).hand_card[1], community_card[0],
-            community_card[1], community_card[2], community_card[3]);
+            (*player).hand_card[0], (*player).hand_card[1],
+            community_card[0], community_card[1],
+            community_card[2], community_card[3],
+            straight_card_array
+        );
     case 5:
-        return straight_hand_judge((*player).hand_card[0],
-                                   (*player).hand_card[1], community_card[0],
-                                   community_card[1], community_card[2]);
+        return straight_hand_judge(
+            (*player).hand_card[0], (*player).hand_card[1], 
+            community_card[0], community_card[1],
+            community_card[2], straight_card_array
+        );
     default:
         return NONE;
     }
@@ -309,12 +356,11 @@ hand_t call_pair_hand_judge(player_t *player) {
 }
 
 void hand_evaluation(player_t *player) {
+    card_t straight_card_array[5];
     hand_t flash_ref = call_flash_hand_judge(player);
-    hand_t straight_ref = call_straight_hand_judge(player);
+    hand_t straight_ref = call_straight_hand_judge(player, straight_card_array);
     hand_t pair_ref = call_pair_hand_judge(player);
-    hand_t straight_flash_ref = (straight_ref == STRAIGHT && flash_ref == FLASH)
-                                    ? STRAIGHT_FLASH
-                                    : NONE;
+    hand_t straight_flash_ref = straight_flash_hand_judge(straight_ref, straight_card_array);
     // ロイヤルストレートフラッシュ
     if (straight_flash_ref == STRAIGHT_FLASH && is_ahigh_straight) {
         (*player).hand = ROYAL_STRAIGHT_FLASH;
@@ -429,17 +475,8 @@ int player_action_select(player_t *player, int *checked_count) {
     int select = 0;
     int local_latch = 0;
     hand_evaluation(player);
-    int player_clear;
     if (player->state != PLAYING) {
         return 0;
-    }
-    while(true){
-        printf("%s", player->player_name);
-        print_prompt("の手札が表示されます。よろしいですか？\nはい: 1, いいえ: 2", &player_clear);
-        if(player_clear == 1) {
-            printf("\033[2J");
-            break;
-        };
     }
     for(int i = 0; i < opened_card_count - 2; i++){
         printf("コミュニティカードの%d枚目は%sの%d\n", i + 1, get_suit_string(community_card[i].suit), community_card[i].number);
