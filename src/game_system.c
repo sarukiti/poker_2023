@@ -446,10 +446,12 @@ int player_action_select(player_t *player, int *checked_count) {
     }
     printf("今の役は%s\n", get_hand_string(player->hand));
 
-    printf("手札は%sの%dと%sの%d\n", get_suit_string(player->hand_card[0].suit),
-           player->hand_card[0].number,
-           get_suit_string(player->hand_card[1].suit),
-           player->hand_card[1].number);
+    printf("手札は%sの%sと%sの%s\n",
+        get_suit_string(player->hand_card[0].suit),
+        get_card_number_string(player->hand_card[0].number),
+        get_suit_string(player->hand_card[1].suit),
+        get_card_number_string(player->hand_card[1].number)
+    );
     printf("%sが持っているコインは%d枚\n", player->player_name, player->coin);
     printf("%sがコールしたときに賭けるコインは%d枚\n", player->player_name, before_latch - player->latch);
     printf("掛け金に対する操作を選んでください\n");
@@ -523,14 +525,24 @@ void calc_player_profit(player_t* player){
 void showdown(player_t** players){
     printf("\033[2J");
     for(int i = 0; i < 5; i++){
-        printf("コミュニティカードの%d枚目は%sの%d\n", i + 1, get_suit_string(community_card[i].suit), community_card[i].number);
+        printf("コミュニティカードの%d枚目は%sの%s\n",
+            i + 1,
+            get_suit_string(community_card[i].suit),
+            get_card_number_string(community_card[i].number)
+        );
     }
     for(int i = 0; i < player_count; i++){
         if (players[i]->state != PLAYING) {
             continue;
         }
         printf("%sの手札\n", players[i]->player_name);
-        printf("  %sの%d, %sの%d (%s)\n", get_suit_string(players[i]->hand_card[0].suit), players[i]->hand_card[0].number, get_suit_string(players[i]->hand_card[1].suit), players[i]->hand_card[1].number, get_hand_string(players[i]->hand));
+        printf("  %sの%s, %sの%s (%s)\n",
+            get_suit_string(players[i]->hand_card[0].suit),
+            get_card_number_string(players[i]->hand_card[0].number),
+            get_suit_string(players[i]->hand_card[1].suit),
+            get_card_number_string(players[i]->hand_card[1].number),
+            get_hand_string(players[i]->hand)
+        );
         printf("\n");
         hand_evaluation(players[i]);
     }

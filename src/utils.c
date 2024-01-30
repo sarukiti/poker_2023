@@ -15,6 +15,23 @@ const char* get_suit_string(suit_t suit){
     }
 }
 
+const char* get_card_number_string(int num){
+    switch(num){
+        case 11:
+            return "J";
+        case 12:
+            return "Q";
+        case 13:
+            return "K";
+        case 14:
+            return "A";
+        default:
+            static char str[3];
+            sprintf(str, "%d", num);
+            return str;
+    }
+}
+
 const char* get_hand_string(hand_t hand){
     switch(hand){
         case HIGH_CARD:
