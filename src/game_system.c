@@ -17,11 +17,11 @@ constexpr int PLAYER_INITIAL_COIN = 6000;
 
 int player_count = 0;
 bool is_ahigh_straight = false;
-bool is_bet = false;
 int before_latch = 0;
 int table_latch = 0;
 int falled_count = 0;
 int retirement_count = 0;
+int all_in_count = 0;
 
 void shuffle_stock(card_t *stock) {
     int n = 52;
@@ -58,17 +58,17 @@ void game_init(player_t **players) {
 
 int preflop(player_t **players) {
     while (true) {
+        int checked_count = 0;
         for(int i = retirement_count; i < player_count; i++){
-            if (player_action_select(players[i], NULL) == ALMOST_FALLED)
+            if (player_action_select(players[i], &checked_count) == ALMOST_FALLED)
                 return ALMOST_FALLED;
             if (is_all_latch_equal(players))
                 return SUCCESS;
-            }
+        }
     }
 }
 
 int flop(player_t **players) {
-    is_bet = false;
     before_latch = 0;
 
     for(int i = 0; i < player_count; i++){
@@ -84,12 +84,12 @@ int flop(player_t **players) {
         for(int i = retirement_count; i < player_count; i++){
             if (player_action_select(players[i], &checked_count) == ALMOST_FALLED)
                 return ALMOST_FALLED;
-            if (is_all_latch_equal(players)){
+            if (is_all_latch_equal(players) || player_count - (falled_count + retirement_count + all_in_count) == 1){
                 next_betting_round(players);
-                break;
+                continue;
             }
         }
-        if (checked_count == (player_count - falled_count - retirement_count)) {
+        if (checked_count == (player_count - falled_count - retirement_count - all_in_count)) {
             if (opened_card_count == 7) {
                 return SHOWDOWN;
             }
@@ -101,7 +101,6 @@ int flop(player_t **players) {
 }
 
 void next_betting_round(player_t** players){
-    is_bet = false;
     before_latch = 0;
     for(int i = 0; i < player_count; i++){
         players[i]->latch = 0;
@@ -147,7 +146,7 @@ void player_reset(player_t *player) {
     player->hand_card[0] = draw_card();
     player->hand_card[1] = draw_card();
     player->hand = HIGH_CARD;
-    if(player->state == FALLED) player->state = PLAYING;
+    if(player->state == FALLED || player->state == ALL_IN) player->state = PLAYING;
     opened_card_count = 2;
     return;
 }
@@ -375,7 +374,7 @@ void player_rank_evaluation(player_t** players) {
     int rank = 1;
     for(int i = 0; i < player_count - retirement_count; i++){
         sorted_players[i]->rank = rank++;
-        if(sorted_players[i]->state != PLAYING) {
+        if(sorted_players[i]->state != PLAYING && sorted_players[i]->state != ALL_IN) {
             sorted_players[i]->rank = -1;
             rank--;
         }
@@ -389,31 +388,42 @@ void check(player_t *player, int *checked_count) {
 }
 
 void force_bet(player_t *player, int bet_latch) {
-    if (player->coin - bet_latch < 0) {
-        table_latch += player->coin;
-        player->coin = 0;
+    if(player->coin - bet_latch <= 0) {
+        all_in(player);
+        return;
+    }else{
+        table_latch += bet_latch;
+        player->latch += bet_latch;
+        player->coin -= bet_latch;
+        before_latch = player->latch;
     }
-    player->coin -= bet_latch;
-    table_latch += bet_latch;
-    player->latch += bet_latch;
-    before_latch = player->latch;
-    is_bet = true;
+    return;
 }
+
 int bet(player_t *player, int bet_latch) {
-    if(player->coin - before_latch < 0) return HAVING_COIN_MINUS;
+    int raise_latch = before_latch - player->latch + bet_latch;
+
+    if(player->coin - (before_latch - player->latch) < 0) return HAVING_COIN_MINUS;
     if(bet_latch == 0) return LATCH_ZERO;
     if(bet_latch < 0) return LATCH_MINUS;
-    if (((int)player->coin - (before_latch + bet_latch)) < 0) return LATCH_TOO_MUCH;
+    if((player->coin - raise_latch) < 0) return LATCH_TOO_MUCH;
 
-    player->coin -= (before_latch + bet_latch);
-    table_latch += (before_latch + bet_latch);
-    player->latch += (before_latch + bet_latch);
+    if(player->coin - raise_latch == 0) {
+        all_in(player);
+        return 0;
+    }
+    player->coin -= raise_latch;
+    table_latch += raise_latch;
+    player->latch += raise_latch;
     before_latch = player->latch;
-    is_bet = true;
     return 0;
 }
 void call(player_t *player) {
     int call_latch = before_latch - player->latch;
+    if(player->coin - call_latch <= 0) {
+        all_in(player);
+        return;
+    }
     player->coin -= call_latch;
     table_latch += call_latch;
     player->latch += call_latch;
@@ -425,7 +435,20 @@ void falled(player_t *player) {
     return;
 }
 
+void all_in(player_t *player) {
+    player->state = ALL_IN;
+    table_latch += player->coin;
+    player->latch += player->coin;
+    player->coin = 0;
+    if (player->latch > before_latch) {
+        before_latch = player->latch;
+    }
+    all_in_count++;
+    return;
+}
+
 int player_action_select(player_t *player, int *checked_count) {
+    const bool is_bet = (before_latch - player->latch) != 0;
     int select = 0;
     int local_latch = 0;
     hand_evaluation(player);
@@ -433,6 +456,11 @@ int player_action_select(player_t *player, int *checked_count) {
     if (player->state != PLAYING) {
         return 0;
     }
+    if (player_count - (falled_count + retirement_count + all_in_count) == 1 && !is_bet){
+        check(player, checked_count);
+        return 0;
+    }
+
     while(true){
         printf("%s", player->player_name);
         print_prompt("の手札が表示されます。よろしいですか？\nはい: 1, いいえ: 2", &player_clear);
@@ -442,7 +470,7 @@ int player_action_select(player_t *player, int *checked_count) {
         };
     }
     for(int i = 0; i < opened_card_count - 2; i++){
-        printf("コミュニティカードの%d枚目は%sの%d\n", i + 1, get_suit_string(community_card[i].suit), community_card[i].number);
+        printf("コミュニティカードの%d枚目は%sの%s\n", i + 1, get_suit_string(community_card[i].suit), get_card_number_string(community_card[i].number));
     }
     printf("今の役は%s\n", get_hand_string(player->hand));
 
@@ -459,11 +487,11 @@ int player_action_select(player_t *player, int *checked_count) {
     printf("%sの操作\n", player->player_name);
 
     while ((!(select > 0 && select < 4) && is_bet) || (!(select > 0 && select < 3) && !is_bet)) {
-        if (!is_bet)
+        if (!is_bet){
             print_prompt("チェック: 1, ベット: 2", &select);
-        else
+        }else{
             print_prompt("コール: 1, レイズ: 2, フォールド: 3", &select);
-
+        }
 
         switch (select) {
         case 1:
@@ -537,7 +565,7 @@ void showdown(player_t** players){
         );
     }
     for(int i = 0; i < player_count; i++){
-        if (players[i]->state != PLAYING) {
+        if (players[i]->state != PLAYING && players[i]->state != ALL_IN) {
             continue;
         }
         printf("%sの手札\n", players[i]->player_name);
@@ -548,7 +576,6 @@ void showdown(player_t** players){
             get_card_number_string(players[i]->hand_card[1].number),
             get_hand_string(players[i]->hand)
         );
-        printf("\n");
         hand_evaluation(players[i]);
     }
     player_rank_evaluation(players);
@@ -587,6 +614,7 @@ void next_game(player_t **players) {
     }
 
     falled_count = 0;
+    all_in_count = 0;
 
     // デッキをシャッフル
     shuffle_stock(stock);
@@ -625,7 +653,7 @@ void finish_game(player_t **players) {
     // 勝者の判定
     player_t winner;
     for(int i = 0; i < player_count; i++){
-        if(players[i]->state == PLAYING){
+        if(players[i]->state == PLAYING || players[i]->state == ALL_IN){
             printf("%sが勝利\n", players[i]->player_name);
             winner = *players[i];
             break;

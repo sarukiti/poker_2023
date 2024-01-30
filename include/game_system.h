@@ -6,7 +6,6 @@ typedef struct player player_t;
 
 extern int player_count;
 extern bool is_ahigh_straight;
-extern bool is_bet;
 extern int table_latch;
 
 void shuffle_stock(card_t* stock);
@@ -28,6 +27,7 @@ void force_bet(player_t *player, int bet_latch);
 int bet(player_t *player, int bet_latch);
 void call(player_t* player);
 void falled(player_t* player);
+void all_in(player_t* player);
 void almost_falled(player_t** players);
 void calc_player_profit(player_t* player);
 void showdown(player_t** player);
