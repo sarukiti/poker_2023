@@ -5,13 +5,13 @@
 const char* get_suit_string(suit_t suit){
     switch(suit){
         case SPADE:
-            return "\x1b[38;5;0mSPADE\x1b[39m";
+            return "\x1b[38;5;243mSPADE\x1b[39m";
         case HEART:
             return "\x1b[38;5;88mHEART\x1b[39m";
         case DIAMOND:
             return "\x1b[38;5;88mDIAMOND\x1b[39m";
         case CLOVER:
-            return "\x1b[38;5;0mCLOVER\x1b[39m";
+            return "\x1b[38;5;243mCLOVER\x1b[39m";
     }
 }
 
@@ -51,7 +51,7 @@ const char* get_card_number_string(int num){
 const char* get_hand_string(hand_t hand){
     switch(hand){
         case HIGH_CARD:
-            return "\x1b[38;5;0mHIGH_CARD\x1b[39m";
+            return "\x1b[38;5;243mHIGH_CARD\x1b[39m";
         case ONE_PAIR:
             return "\x1b[38;5;22mONE_PAIR\x1b[39m";
         case TWO_PAIR:
