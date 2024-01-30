@@ -31,7 +31,7 @@ int main(void){
     player_t* players_addr[player_count];
 
     for(int i = 0; i < player_count; i++){
-        bool is_name_equal;
+        bool is_name_equal = false;
         char player_name[1024];
         do{
             printf("プレイヤー%dの名前を入力してください\n> ", i + 1);
@@ -40,10 +40,10 @@ int main(void){
                 if(strcmp(players_addr[j]->player_name, player_name) == 0){
                     printf("同じ名前があります．名前を入力しなおしてください\n");
                     is_name_equal = true;
+                    break;
                 }else{
                     is_name_equal = false;
                 }
-                break;
             }
         }while(is_name_equal);
         players[i] = player_init(player_name);
