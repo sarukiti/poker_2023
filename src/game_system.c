@@ -154,10 +154,6 @@ void player_reset(player_t *player) {
 
 void community_card_open() {
     community_card[opened_card_count - 2] = draw_card();
-    printf("コミュニティカードの%d枚目は%sの%d\n",
-                opened_card_count - 1,
-                get_suit_string(community_card[opened_card_count - 2].suit),
-                community_card[opened_card_count - 2].number);
     opened_card_count++;
 }
 
@@ -432,9 +428,11 @@ void falled(player_t *player) {
 int player_action_select(player_t *player, int *checked_count) {
     int select = 0;
     int local_latch = 0;
-
     hand_evaluation(player);
     int player_clear;
+    if (player->state != PLAYING) {
+        return 0;
+    }
     while(true){
         printf("%s", player->player_name);
         print_prompt("の手札が表示されます。よろしいですか？\nはい: 1, いいえ: 2", &player_clear);
@@ -442,6 +440,9 @@ int player_action_select(player_t *player, int *checked_count) {
             printf("\033[2J");
             break;
         };
+    }
+    for(int i = 0; i < opened_card_count - 2; i++){
+        printf("コミュニティカードの%d枚目は%sの%d\n", i + 1, get_suit_string(community_card[i].suit), community_card[i].number);
     }
     printf("今の役は%s\n", get_hand_string(player->hand));
 
@@ -455,10 +456,6 @@ int player_action_select(player_t *player, int *checked_count) {
 
     printf("%sの操作\n", player->player_name);
 
-    if (player->state != PLAYING) {
-        printf("フォールド.\n");
-        return 0;
-    }
     while ((!(select > 0 && select < 4) && is_bet) || (!(select > 0 && select < 3) && !is_bet)) {
         if (!is_bet)
             print_prompt("チェック: 1, ベット: 2", &select);
@@ -524,10 +521,14 @@ void calc_player_profit(player_t* player){
 }
 
 void showdown(player_t** players){
+    printf("\033[2J");
     for(int i = 0; i < 5; i++){
         printf("コミュニティカードの%d枚目は%sの%d\n", i + 1, get_suit_string(community_card[i].suit), community_card[i].number);
     }
     for(int i = 0; i < player_count; i++){
+        if (players[i]->state != PLAYING) {
+            continue;
+        }
         printf("%sの手札\n", players[i]->player_name);
         printf("  %sの%d, %sの%d (%s)\n", get_suit_string(players[i]->hand_card[0].suit), players[i]->hand_card[0].number, get_suit_string(players[i]->hand_card[1].suit), players[i]->hand_card[1].number, get_hand_string(players[i]->hand));
         printf("\n");
