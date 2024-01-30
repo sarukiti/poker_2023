@@ -34,3 +34,5 @@ void showdown(player_t** player);
 void finish_game(player_t** players);
 
 hand_t straight_hand_judge(...);
+hand_t flash_hand_judge(...);
+hand_t straight_flash_hand_judge(hand_t straight_ref, card_t* straight_card_array);
