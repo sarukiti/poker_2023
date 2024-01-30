@@ -473,6 +473,11 @@ int player_action_select(player_t *player, int *checked_count) {
                 call(player);
             break;
         case 2:
+            if(player->coin <= 0){
+                printf("所持しているコインの枚数がゼロ以下なので何もできません\n");
+                select = 0;
+                break;
+            }
             while(true){
                 print_prompt("掛け金を入力してください", &local_latch);
                 switch(bet(player, local_latch)){
