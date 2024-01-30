@@ -9,6 +9,9 @@
 #include "game_system.h"
 
 int main(void){
+    printf("\e[48;5;232m");
+    printf("\033[2J");
+    
     srand((unsigned int)time(NULL));
     shuffle_stock(stock);
 
