@@ -73,7 +73,7 @@ int preflop(player_t **players) {
             }
 
             printf("プリフロップ %dウェーブ %d人目: %s\n\n", wave_counter, i - retirement_count + 1, players[i]->player_name);
-            if (player_action_select(players[i], NULL) == ALMOST_FALLED)
+            if (player_action_select(players[i], &checked_count) == ALMOST_FALLED)
 
                 return ALMOST_FALLED;
             if (is_all_latch_equal(players))
@@ -513,8 +513,12 @@ int player_action_select(player_t *player, int *checked_count) {
         get_suit_string(player->hand_card[1].suit),
         get_card_number_string(player->hand_card[1].number)
     );
+    printf("\n");
     printf("%sが持っているコインは%d枚\n", player->player_name, player->coin);
-    printf("%sがコールしたときに賭けるコインは%d枚\n", player->player_name, before_latch - player->latch);
+    printf("テーブルに置かれた賭け金の合計は%d枚\n", table_latch);
+    printf("前のプレイヤーが賭けたコインは%d枚\n", before_latch);
+    printf("%sが賭けたコインは%d枚\n", player->player_name, player->latch);
+    printf("\n");
     printf("掛け金に対する操作を選んでください\n");
 
     printf("%sの操作\n", player->player_name);
