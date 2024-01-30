@@ -9,7 +9,7 @@ typedef enum hand{
 }hand_t;
 
 typedef enum player_state {
-    FALLED, PLAYING, RETIREMENT
+    PLAYING, ALL_IN, FALLED, RETIREMENT
 }player_state_t;
 
 typedef struct card {
